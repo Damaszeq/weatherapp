@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.tomaszwejner.weatherapp.WeatherController"
+            prefHeight="400.0" prefWidth="600.0">
+
+    <children>
+        <!-- RadioButtony do wyboru trybu -->
+        <RadioButton fx:id="cityRadioButton" layoutX="50" layoutY="20" text="Szukaj po mieście" />
+        <RadioButton fx:id="coordsRadioButton" layoutX="200" layoutY="20" text="Szukaj po współrzędnych" />
+
+        <!-- Pole tekstowe na miasto -->
+        <TextField fx:id="cityTextField" layoutX="50" layoutY="50" prefWidth="200" promptText="Wpisz miasto..." />
+
+        <!-- Pola tekstowe na szerokość i długość geograficzną -->
+        <TextField fx:id="latitudeTextField" layoutX="50" layoutY="50" prefWidth="95" promptText="Szerokość" visible="false" />
+        <TextField fx:id="longitudeTextField" layoutX="155" layoutY="50" prefWidth="95" promptText="Długość" visible="false" />
+
+        <!-- Przycisk pobierania pogody -->
+        <Button fx:id="getWeatherButton" layoutX="270" layoutY="50" text="Pobierz pogodę" onAction="#onGetWeatherClicked" />
+
+        <!-- Label do wyświetlania pogody -->
+        <Label fx:id="weatherLabel" layoutX="50" layoutY="100" prefWidth="500" wrapText="true" text="Tu pojawi się pogoda" />
+    </children>
+
+</AnchorPane>
