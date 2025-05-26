@@ -26,29 +26,41 @@ public class WeatherController {
     @FXML
     private Label weatherLabel;
 
+    @FXML
+    private CheckBox temperatureCheckbox;
+
+    @FXML
+    private CheckBox soilTempCheckbox;
+
+    @FXML
+    private CheckBox windCheckbox;
+
+    @FXML
+    private CheckBox rainCheckbox;
+
+    @FXML
+    private CheckBox pressureCheckbox;
+
     private final GeoCodingService geoCodingService = new GeoCodingService();
     private final WeatherService weatherService = new WeatherService();
 
+    @FXML
     private ToggleGroup toggleGroup;
 
     @FXML
     public void initialize() {
-        // Grupowanie radio buttonów, by tylko jeden mógł być wybrany
         toggleGroup = new ToggleGroup();
         cityRadioButton.setToggleGroup(toggleGroup);
         coordsRadioButton.setToggleGroup(toggleGroup);
 
-        // Domyślnie zaznacz wyszukiwanie po mieście
         cityRadioButton.setSelected(true);
-
-        // Dodaj listener na zmianę wyboru
         toggleGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
             toggleInputFields();
         });
 
-        // Ustaw widoczność pól na start
         toggleInputFields();
     }
+
 
     private void toggleInputFields() {
         boolean citySelected = cityRadioButton.isSelected();

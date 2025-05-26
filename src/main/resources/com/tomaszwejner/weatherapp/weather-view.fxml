@@ -10,8 +10,8 @@
 
     <children>
         <!-- RadioButtony do wyboru trybu -->
-        <RadioButton fx:id="cityRadioButton" layoutX="50" layoutY="20" text="Szukaj po mieście" />
-        <RadioButton fx:id="coordsRadioButton" layoutX="200" layoutY="20" text="Szukaj po współrzędnych" />
+        <RadioButton fx:id="cityRadioButton" layoutX="50" layoutY="20" text="Szukaj po mieście"  />
+        <RadioButton fx:id="coordsRadioButton" layoutX="200" layoutY="20" text="Szukaj po współrzędnych"  />
 
         <!-- Pole tekstowe na miasto -->
         <TextField fx:id="cityTextField" layoutX="50" layoutY="50" prefWidth="200" promptText="Wpisz miasto..." />
@@ -25,6 +25,16 @@
 
         <!-- Label do wyświetlania pogody -->
         <Label fx:id="weatherLabel" layoutX="50" layoutY="100" prefWidth="500" wrapText="true" text="Tu pojawi się pogoda" />
+
+        <!-- Sekcja wyboru danych pogodowych -->
+        <VBox layoutX="50" layoutY="150" spacing="5">
+            <Label text="Wybierz dane pogodowe:" />
+            <CheckBox fx:id="temperatureCheckbox" text="Temperatura na 2m" />
+            <CheckBox fx:id="soilTempCheckbox" text="Temperatura gleby" />
+            <CheckBox fx:id="windCheckbox" text="Prędkość wiatru" />
+            <CheckBox fx:id="rainCheckbox" text="Opady" />
+            <CheckBox fx:id="pressureCheckbox" text="Ciśnienie" />
+        </VBox>
     </children>
 
 </AnchorPane>
