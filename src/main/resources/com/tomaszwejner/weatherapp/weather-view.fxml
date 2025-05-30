@@ -8,33 +8,41 @@
             fx:controller="com.tomaszwejner.weatherapp.WeatherController"
             prefHeight="400.0" prefWidth="600.0">
 
-    <children>
-        <!-- RadioButtony do wyboru trybu -->
-        <RadioButton fx:id="cityRadioButton" layoutX="50" layoutY="20" text="Szukaj po mieście"  />
-        <RadioButton fx:id="coordsRadioButton" layoutX="200" layoutY="20" text="Szukaj po współrzędnych"  />
+    <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="10">
 
-        <!-- Pole tekstowe na miasto -->
-        <TextField fx:id="cityTextField" layoutX="50" layoutY="50" prefWidth="200" promptText="Wpisz miasto..." />
+        <!-- Tryb wyboru -->
+        <HBox spacing="20">
+            <RadioButton fx:id="cityRadioButton" text="Szukaj po mieście"/>
+            <RadioButton fx:id="coordsRadioButton" text="Szukaj po współrzędnych"/>
+        </HBox>
 
-        <!-- Pola tekstowe na szerokość i długość geograficzną -->
-        <TextField fx:id="latitudeTextField" layoutX="50" layoutY="50" prefWidth="95" promptText="Szerokość" visible="false" />
-        <TextField fx:id="longitudeTextField" layoutX="155" layoutY="50" prefWidth="95" promptText="Długość" visible="false" />
-
-        <!-- Przycisk pobierania pogody -->
-        <Button fx:id="getWeatherButton" layoutX="270" layoutY="50" text="Pobierz pogodę" onAction="#onGetWeatherClicked" />
-
-        <!-- Label do wyświetlania pogody -->
-        <Label fx:id="weatherLabel" layoutX="50" layoutY="100" prefWidth="500" wrapText="true" text="Tu pojawi się pogoda" />
+        <!-- Pola tekstowe -->
+        <HBox spacing="10">
+            <TextField fx:id="cityTextField" promptText="Wpisz miasto..." />
+            <TextField fx:id="latitudeTextField" promptText="Szerokość" visible="false" />
+            <TextField fx:id="longitudeTextField" promptText="Długość" visible="false" />
+            <Button fx:id="getWeatherButton" text="Pobierz pogodę" onAction="#onGetWeatherClicked" />
+        </HBox>
 
         <!-- Sekcja wyboru danych pogodowych -->
-        <VBox layoutX="50" layoutY="150" spacing="5">
-            <Label text="Wybierz dane pogodowe:" />
-            <CheckBox fx:id="temperatureCheckbox" text="Temperatura na 2m" />
-            <CheckBox fx:id="soilTempCheckbox" text="Temperatura gleby" />
-            <CheckBox fx:id="windCheckbox" text="Prędkość wiatru" />
-            <CheckBox fx:id="rainCheckbox" text="Opady" />
-            <CheckBox fx:id="pressureCheckbox" text="Ciśnienie" />
+        <VBox spacing="5">
+            <Label text="Wybierz dane pogodowe:"/>
+            <HBox spacing="10">
+                <CheckBox fx:id="temperatureCheckbox" text="Temperatura na 2m"/>
+                <CheckBox fx:id="soilTempCheckbox" text="Temperatura gleby"/>
+                <CheckBox fx:id="windCheckbox" text="Prędkość wiatru"/>
+                <CheckBox fx:id="rainCheckbox" text="Opady"/>
+                <CheckBox fx:id="pressureCheckbox" text="Ciśnienie"/>
+            </HBox>
         </VBox>
-    </children>
+
+        <!-- Pole tekstowe na wynik -->
+        <ScrollPane fitToWidth="true" prefHeight="200" VBox.vgrow="ALWAYS">
+            <content>
+                <Label fx:id="resultLabel" wrapText="true" />
+            </content>
+        </ScrollPane>
+
+    </VBox>
 
 </AnchorPane>

@@ -2,6 +2,8 @@ package com.tomaszwejner.weatherapp;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class WeatherController {
 
@@ -24,8 +26,8 @@ public class WeatherController {
     private Button getWeatherButton;
 
     @FXML
-    private Label weatherLabel;
-
+    private Label resultLabel;
+    
     @FXML
     private CheckBox temperatureCheckbox;
 
@@ -77,29 +79,44 @@ public class WeatherController {
         longitudeTextField.setVisible(!citySelected);
 
         // Czyść labelkę przy zmianie metody wyszukiwania
-        weatherLabel.setText("");
+        resultLabel.setText("");
+    }
+
+    @FXML
+    private List<String> getSelectedParameters() {
+        List<String> parameters = new ArrayList<>();
+
+        if (temperatureCheckbox.isSelected()) parameters.add("temperature_2m");
+        if (soilTempCheckbox.isSelected()) parameters.add("soil_temperature_0cm");
+        if (windCheckbox.isSelected()) parameters.add("windspeed_10m");
+        if (rainCheckbox.isSelected()) parameters.add("precipitation");
+        if (pressureCheckbox.isSelected()) parameters.add("surface_pressure");
+
+        return parameters;
     }
 
     @FXML
     private void onGetWeatherClicked() {
         try {
+            List<String> selectedParameters = getSelectedParameters();
+
             if (cityRadioButton.isSelected()) {
                 String city = cityTextField.getText();
                 if (city == null || city.isEmpty()) {
-                    weatherLabel.setText("Podaj nazwę miasta.");
+                    resultLabel.setText("Podaj nazwę miasta.");
                     return;
                 }
 
                 Coordinates coords = geoCodingService.getCoordinates(city);
-                String weather = weatherService.getCurrentWeather(coords.latitude, coords.longitude);
-                weatherLabel.setText("Pogoda w " + city + ":\n" + weather);
+                String weather = weatherService.getCurrentWeather(coords.latitude, coords.longitude, selectedParameters);
+                resultLabel.setText("Pogoda w " + city + ":\n" + weather);
 
             } else if (coordsRadioButton.isSelected()) {
                 String latText = latitudeTextField.getText();
                 String lonText = longitudeTextField.getText();
 
                 if (latText == null || latText.isEmpty() || lonText == null || lonText.isEmpty()) {
-                    weatherLabel.setText("Podaj szerokość i długość geograficzną.");
+                    resultLabel.setText("Podaj szerokość i długość geograficzną.");
                     return;
                 }
 
@@ -108,17 +125,18 @@ public class WeatherController {
                     lat = Double.parseDouble(latText);
                     lon = Double.parseDouble(lonText);
                 } catch (NumberFormatException e) {
-                    weatherLabel.setText("Szerokość i długość muszą być liczbami.");
+                    resultLabel.setText("Szerokość i długość muszą być liczbami.");
                     return;
                 }
 
-                String weather = weatherService.getCurrentWeather(lat, lon);
-                weatherLabel.setText("Pogoda dla współrzędnych: " + lat + " " + lon + "\n" + weather);
-
+                String weather = weatherService.getCurrentWeather(lat, lon, selectedParameters);
+                resultLabel.setText("Pogoda dla współrzędnych: " + lat + ", " + lon + "\n" + weather);
             }
         } catch (Exception e) {
-            weatherLabel.setText("Błąd: " + e.getMessage());
+            resultLabel.setText("Błąd: " + e.getMessage());
             e.printStackTrace();
         }
     }
+
+
 }
