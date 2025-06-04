@@ -7,17 +7,36 @@ import java.net.URL;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import java.util.ArrayList;
-import java.util.List;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-
+import java.util.Locale;
 
 public class WeatherService {
+
+    private String getLabelForParameter(String param) {
+        return switch (param) {
+            case "temperature_2m" -> "Temperatura";
+            case "relative_humidity_2m" -> "Wilgotność";
+            case "soil_temperature_0cm" -> "Temperatura gleby";
+            case "windspeed_10m" -> "Wiatr";
+            case "precipitation" -> "Opady";
+            case "surface_pressure" -> "Ciśnienie";
+            default -> param;
+        };
+    }
+
+    private String getUnitForParameter(String param) {
+        return switch (param) {
+            case "temperature_2m" -> "°C";
+            case "relative_humidity_2m" -> "%";
+            case "wind_speed_10m" -> " km/h";
+            case "precipitation" -> " mm";
+            case "pressure_msl" -> " hPa";
+            default -> "";
+        };
+    }
 
     public String getCurrentWeather(double latitude, double longitude, List<String> parameters) {
         try {
@@ -27,10 +46,10 @@ public class WeatherService {
 
             if (!parameters.isEmpty()) {
                 String joinedParams = String.join(",", parameters);
-                apiUrl.append("&current_weather=true"); // nadal pobieramy "current_weather"
-                apiUrl.append("&hourly=").append(joinedParams); // dodajemy parametry do sekcji "hourly"
+                apiUrl.append("&current_weather=true");
+                apiUrl.append("&hourly=").append(joinedParams);
             } else {
-                apiUrl.append("&current_weather=true"); // tylko ogólna pogoda
+                apiUrl.append("&current_weather=true");
             }
 
             URL url = new URL(apiUrl.toString());
@@ -43,15 +62,14 @@ public class WeatherService {
             }
 
             BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String inputLine;
             StringBuilder response = new StringBuilder();
+            String inputLine;
 
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
             }
             in.close();
 
-            // Parsowanie odpowiedzi
             JSONObject json = new JSONObject(response.toString());
             JSONObject currentWeather = json.getJSONObject("current_weather");
             StringBuilder result = new StringBuilder();
@@ -63,7 +81,6 @@ public class WeatherService {
                 result.append("Prędkość wiatru: ").append(currentWeather.getDouble("windspeed")).append(" km/h\n");
             }
 
-            // Dodatkowe dane z "hourly"
             if (json.has("hourly")) {
                 JSONObject hourly = json.getJSONObject("hourly");
                 JSONArray timeArray = hourly.getJSONArray("time");
@@ -87,8 +104,6 @@ public class WeatherService {
                     result.append("Temperatura gleby: ").append(soilTemp).append(" °C\n");
                 }
             }
-
-            // Możesz też wypisać, że inne dane (jak opady, ciśnienie, itp.) będą dostępne z hourly w osobnym etapie
 
             if (result.isEmpty()) {
                 result.append("Brak danych pogodowych dla wybranych parametrów.");
@@ -115,8 +130,6 @@ public class WeatherService {
                 apiUrl.append("&hourly=").append(joinedParams);
             }
 
-            // Nie dodawaj tutaj current_weather=true, bo to jest prognoza na dni, nie aktualna pogoda
-
             URL url = new URL(apiUrl.toString());
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -135,7 +148,6 @@ public class WeatherService {
             }
             in.close();
 
-            // Parsowanie odpowiedzi z pola "hourly"
             JSONObject json = new JSONObject(response.toString());
 
             if (!json.has("hourly")) {
@@ -149,24 +161,39 @@ public class WeatherService {
 
             for (int i = 0; i < timeArray.length(); i++) {
                 String time = timeArray.getString(i);
-                result.append(time).append(": ");
+
+                LocalDateTime dateTime = LocalDateTime.parse(time);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM HH:mm", new Locale("pl"));
+                String formattedTime = dateTime.format(formatter);
+
+                result.append(formattedTime).append(":\n");
 
                 for (String param : parameters) {
                     if (hourly.has(param)) {
                         JSONArray paramArray = hourly.getJSONArray(param);
                         Object val = paramArray.get(i);
+
+                        String formattedValue;
                         if (val == JSONObject.NULL) {
-                            result.append(param).append("=null ");
+                            formattedValue = "brak danych";
                         } else if (val instanceof Number) {
-                            result.append(param).append("=").append(paramArray.getDouble(i)).append(" ");
+                            double number = ((Number) val).doubleValue();
+
+                            if (param.toLowerCase().contains("precipitation") && number == 0.0) {
+                                formattedValue = "brak";
+                            } else {
+                                formattedValue = number + getUnitForParameter(param);
+                            }
                         } else {
-                            result.append(param).append("=").append(val.toString()).append(" ");
+                            formattedValue = val.toString();
                         }
+
+                        result.append("  ").append(getLabelForParameter(param)).append(": ").append(formattedValue).append("\n");
                     }
                 }
+
                 result.append("\n");
             }
-
 
             return result.toString();
 
@@ -175,7 +202,4 @@ public class WeatherService {
             return "Błąd podczas pobierania prognozy pogody.";
         }
     }
-
-
-
 }

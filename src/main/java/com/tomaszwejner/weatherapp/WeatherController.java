@@ -54,6 +54,9 @@ public class WeatherController {
     private CheckBox pressureCheckbox;
 
     @FXML
+    private Button selectAllButton;
+
+    @FXML
     private CheckBox forecastCheckbox;
 
     @FXML
@@ -71,13 +74,17 @@ public class WeatherController {
         cityRadioButton.setToggleGroup(toggleGroup);
         coordsRadioButton.setToggleGroup(toggleGroup);
         cityRadioButton.setSelected(true);
+        selectAllButton.setText("Zaznacz wszystko");
         toggleGroup.selectedToggleProperty().addListener((obs, oldToggle, newToggle) -> {
             toggleInputFields();
         });
 
         toggleInputFields();
 
-        forecastDaysComboBox.getItems().addAll(1, 3, 5, 7);  // dni prognozy
+        forecastDaysComboBox.getItems().clear();
+        for (int i = 1; i <= 16; i++) {
+            forecastDaysComboBox.getItems().add(i);
+        }
         forecastDaysComboBox.setValue(3); // domyślnie 3 dni
 
         // Możesz też dodać listener, żeby ComboBox był aktywny tylko, gdy checkbox jest zaznaczony
@@ -107,6 +114,31 @@ public class WeatherController {
         // Czyść labelkę przy zmianie metody wyszukiwania
         resultLabel.setText("");
     }
+
+    @FXML
+    private void onSelectAllClicked() {
+        boolean allSelected = temperatureCheckbox.isSelected()
+                && soilTempCheckbox.isSelected()
+                && windCheckbox.isSelected()
+                && rainCheckbox.isSelected()
+                && pressureCheckbox.isSelected();
+
+        boolean newState = !allSelected; // jeśli wszystkie zaznaczone to odznaczamy, jeśli nie - zaznaczamy
+
+        temperatureCheckbox.setSelected(newState);
+        soilTempCheckbox.setSelected(newState);
+        windCheckbox.setSelected(newState);
+        rainCheckbox.setSelected(newState);
+        pressureCheckbox.setSelected(newState);
+
+        // Opcjonalnie zmień tekst przycisku
+        if (newState) {
+            selectAllButton.setText("Odznacz wszystko");
+        } else {
+            selectAllButton.setText("Zaznacz wszystko");
+        }
+    }
+
 
     @FXML
     private List<String> getSelectedParameters() {
@@ -156,7 +188,6 @@ public class WeatherController {
                     resultLabel.setText("Pogoda w " + city + ":\n" + weather);
                 }
 
-
             } else if (coordsRadioButton.isSelected()) {
                 String latText = latitudeTextField.getText();
                 String lonText = longitudeTextField.getText();
@@ -175,6 +206,15 @@ public class WeatherController {
                     return;
                 }
 
+                // **Tu wywołujemy reverse geocoding, żeby poznać nazwę najbliższego miasta**
+                String cityName = "Nieznana lokalizacja";
+                try {
+                    cityName = geoCodingService.getCityName(lat, lon);
+                } catch (Exception e) {
+                    // Jeśli coś pójdzie nie tak, wyświetlamy "Nieznana lokalizacja"
+                    System.err.println("Błąd reverse geocoding: " + e.getMessage());
+                }
+
                 String weather;
 
                 if (forecast) {
@@ -184,18 +224,20 @@ public class WeatherController {
                     String endDateStr = getFormattedDate(endDate);
 
                     weather = weatherService.getWeatherForecast(lat, lon, selectedParameters, startDateStr, endDateStr);
-                    resultLabel.setText("Prognoza pogody dla współrzędnych: " + lat + ", " + lon + " na " + forecastDays + " dni:\n" + weather);
+                    resultLabel.setText("Prognoza pogody dla współrzędnych: " + lat + ", " + lon +
+                            " (" + cityName + ") na " + forecastDays + " dni:\n" + weather);
                 } else {
                     weather = weatherService.getCurrentWeather(lat, lon, selectedParameters);
-                    resultLabel.setText("Pogoda dla współrzędnych: " + lat + ", " + lon + "\n" + weather);
+                    resultLabel.setText("Pogoda dla współrzędnych: " + lat + ", " + lon +
+                            " (" + cityName + ")\n" + weather);
                 }
-
             }
         } catch (Exception e) {
             resultLabel.setText("Błąd: " + e.getMessage());
             e.printStackTrace();
         }
     }
+
 
 
     @FXML

@@ -22,3 +22,6 @@ public class WeatherData {
         return "Temperatura: " + temperature + "°C, Opis: " + description;
     }
 }
+
+
+

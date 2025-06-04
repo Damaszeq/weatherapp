@@ -6,7 +6,7 @@
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.tomaszwejner.weatherapp.WeatherController"
-            prefHeight="400.0" prefWidth="600.0">
+            prefHeight="600.0" prefWidth="900.0">
 
     <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="10">
 
@@ -27,12 +27,16 @@
         <!-- Sekcja wyboru danych pogodowych -->
         <VBox spacing="5">
             <Label text="Wybierz dane pogodowe:"/>
-            <HBox spacing="10">
+            <HBox spacing="20" alignment="CENTER_LEFT" >
                 <CheckBox fx:id="temperatureCheckbox" text="Temperatura na 2m"/>
                 <CheckBox fx:id="soilTempCheckbox" text="Temperatura gleby"/>
+            </HBox>
+
+            <HBox spacing="20" alignment="CENTER_LEFT" >
                 <CheckBox fx:id="windCheckbox" text="Prędkość wiatru"/>
                 <CheckBox fx:id="rainCheckbox" text="Opady"/>
                 <CheckBox fx:id="pressureCheckbox" text="Ciśnienie"/>
+                <Button fx:id="selectAllButton" text="Zaznacz wszystko" onAction="#onSelectAllClicked" />
             </HBox>
 
             <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0 0 0;">
@@ -41,6 +45,7 @@
                 <ComboBox fx:id="forecastDaysComboBox" prefWidth="80" />
             </HBox>
         </VBox>
+
 
         <!-- Pole tekstowe na wynik -->
         <ScrollPane fitToWidth="true" prefHeight="200" VBox.vgrow="ALWAYS">
