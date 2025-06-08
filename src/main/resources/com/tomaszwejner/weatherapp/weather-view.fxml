@@ -2,7 +2,6 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.tomaszwejner.weatherapp.WeatherController"
@@ -16,13 +15,18 @@
             <RadioButton fx:id="coordsRadioButton" text="Szukaj po współrzędnych"/>
         </HBox>
 
-        <!-- Pola tekstowe -->
-        <HBox spacing="10">
-            <TextField fx:id="cityTextField" promptText="Wpisz miasto..." />
-            <TextField fx:id="latitudeTextField" promptText="Szerokość" visible="false" />
-            <TextField fx:id="longitudeTextField" promptText="Długość" visible="false" />
-            <Button fx:id="getWeatherButton" text="Pobierz pogodę" onAction="#onGetWeatherClicked" />
-        </HBox>
+        <!-- Pola tekstowe wraz z przyciskami -->
+        <VBox spacing="10">
+            <HBox spacing="10">
+                <TextField fx:id="cityTextField" promptText="Wpisz miasto..." />
+                <TextField fx:id="latitudeTextField" promptText="Szerokość" visible="false" />
+                <TextField fx:id="longitudeTextField" promptText="Długość" visible="false" />
+                <Button fx:id="getWeatherButton" text="Pobierz pogodę" onAction="#onGetWeatherClicked" />
+            </HBox>
+            <Button fx:id="showChartButton" text="Pokaż wykres" onAction="#handleShowChart" alignment="CENTER_RIGHT" />
+            <Button text="Wykres Opadów" onAction="#handleShowRainChart" />
+
+        </VBox>
 
         <!-- Sekcja wyboru danych pogodowych -->
         <VBox spacing="5">
@@ -55,6 +59,4 @@
         </ScrollPane>
 
     </VBox>
-
-    <Button layoutX="20" layoutY="350" text="Pokaż wykres" onAction="#handleShowChart"/>
 </AnchorPane>

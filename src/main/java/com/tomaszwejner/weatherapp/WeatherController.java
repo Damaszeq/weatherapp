@@ -1,18 +1,16 @@
 package com.tomaszwejner.weatherapp;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
-import javafx.event.ActionEvent;
-import java.io.IOException;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class WeatherController {
@@ -55,6 +53,9 @@ public class WeatherController {
 
     @FXML
     private Button selectAllButton;
+
+    @FXML
+    private Button showChartButton;
 
     @FXML
     private CheckBox forecastCheckbox;
@@ -238,30 +239,124 @@ public class WeatherController {
         }
     }
 
+    private WeatherData parseWeatherDataFromResultLabel() {
+        String text = resultLabel.getText();
+        List<String> dates = new ArrayList<>();
+        List<Double> temps = new ArrayList<>();
+        List<Double> rains = new ArrayList<>();
+
+        String[] lines = text.split("\\r?\\n");
+
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i].trim();
+
+            // Znajdź linie z datą
+            if (line.matches("\\d{1,2} \\p{L}+ \\d{2}:\\d{2}:?")) {
+                dates.add(line.replace(":", ""));
+
+                // Znajdź indeks kolejnej daty lub koniec tablicy
+                int nextDateIndex = lines.length;
+                for (int k = i + 1; k < lines.length; k++) {
+                    if (lines[k].trim().matches("\\d{1,2} \\p{L}+ \\d{2}:\\d{2}:?")) {
+                        nextDateIndex = k;
+                        break;
+                    }
+                }
+
+                // Przeszukaj linie między i+1 a nextDateIndex - 1
+                double temp = 0.0;
+                double rain = 0.0;
+                for (int j = i + 1; j < nextDateIndex; j++) {
+                    String currentLine = lines[j].trim();
+
+                    // Temperatura
+                    if (currentLine.toLowerCase().startsWith("temperatura")) {
+                        String tempStr = currentLine.replaceAll("[^0-9.,-]", "").replace(',', '.');
+                        try {
+                            temp = Double.parseDouble(tempStr);
+                        } catch (NumberFormatException e) {
+                            System.out.println("Nie udało się sparsować temperatury: " + tempStr);
+                        }
+                    }
+
+                    // Opady
+                    if (currentLine.toLowerCase().startsWith("opad")) {
+                        String rainStr = currentLine.replaceAll("[^0-9.,-]", "").replace(',', '.');
+                        if (rainStr.isEmpty()) {
+                            rain = 0.0;
+                        } else {
+                            try {
+                                rain = Double.parseDouble(rainStr);
+                            } catch (NumberFormatException e) {
+                                System.out.println("Nie udało się sparsować opadów: " + rainStr);
+                            }
+                        }
+                    }
+                }
+                temps.add(temp);
+                rains.add(rain);
+            }
+        }
+
+        double currentTemp = temps.isEmpty() ? 0.0 : temps.get(0);
+        String description = "Pogoda z resultLabel";
+
+        return new WeatherData(currentTemp, description, dates, temps, rains);
+    }
+
 
 
     @FXML
-    private void handleShowChart(ActionEvent event) {
+    public void handleShowChart() {
+        WeatherData data = parseWeatherDataFromResultLabel();
+        showChartWithData(data);
+    }
+
+    private void showChartWithData(WeatherData data) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("ChartWindow.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/tomaszwejner/weatherapp/ChartWindow.fxml"));
             Parent root = loader.load();
 
             ChartWindowController chartController = loader.getController();
 
-            // Przykładowe dane do testu
-            List<String> dates = Arrays.asList("2024-06-01", "2024-06-02", "2024-06-03");
-            List<Double> temps = Arrays.asList(20.5, 22.3, 19.8);
-
-            chartController.addSeries("Temperatura", dates, temps);
+            if (data == null || !data.hasForecast()) {
+                System.out.println("Brak danych do wyświetlenia wykresu.");
+            } else {
+                chartController.addSeries("Prognoza temperatury", data.getForecastDates(), data.getForecastTemperatures());
+                //chartController.addSeries("Opady", data.getForecastDates(), data.getForecastRains());
+            }
 
             Stage stage = new Stage();
-            stage.setTitle("Wykres danych pogodowych");
-            stage.setScene(new Scene(root, 600, 400));
+            stage.setTitle("Wykres pogody");
+            stage.setScene(new Scene(root));
             stage.show();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    @FXML
+    public void handleShowRainChart() {
+        WeatherData data = parseWeatherDataFromResultLabel();
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/tomaszwejner/weatherapp/RainChart.fxml"));
+            Parent root = loader.load();
+
+            RainChartWindowController rainController = loader.getController();
+
+            rainController.setRainData(data.getForecastDates(), data.getForecastRains());
+
+            Stage stage = new Stage();
+            stage.setTitle("Wykres opadów");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
+
+

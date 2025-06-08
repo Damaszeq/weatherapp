@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.chart.*?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.geometry.Insets?>
-
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.layout.VBox?>
 <VBox xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.tomaszwejner.weatherapp.ChartWindowController"
       spacing="10.0">
@@ -11,7 +12,7 @@
         <Insets top="10" right="10" bottom="10" left="10"/>
     </padding>
 
-    <LineChart fx:id="lineChart" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+    <LineChart fx:id="lineChart" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" prefHeight="600" prefWidth="900">
         <xAxis>
             <CategoryAxis fx:id="xAxis"/>
         </xAxis>
@@ -19,5 +20,6 @@
             <NumberAxis fx:id="yAxis"/>
         </yAxis>
     </LineChart>
+
 
 </VBox>

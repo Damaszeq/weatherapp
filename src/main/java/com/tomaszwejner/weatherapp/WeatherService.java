@@ -1,13 +1,12 @@
 package com.tomaszwejner.weatherapp;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -29,7 +28,7 @@ public class WeatherService {
 
     private String getUnitForParameter(String param) {
         return switch (param) {
-            case "temperature_2m" -> "°C";
+            case "temperature_2m" -> " °C";
             case "relative_humidity_2m" -> "%";
             case "wind_speed_10m" -> " km/h";
             case "precipitation" -> " mm";
@@ -97,6 +96,8 @@ public class WeatherService {
                     double precipitation = precipitationArray.getDouble(latestIndex);
                     result.append("Opady: ").append(precipitation).append(" mm\n");
                 }
+
+
 
                 if (parameters.contains("soil_temperature_0cm") && hourly.has("soil_temperature_0cm")) {
                     JSONArray soilTempArray = hourly.getJSONArray("soil_temperature_0cm");

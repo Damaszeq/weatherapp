@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.layout.AnchorPane?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.tomaszwejner.weatherapp.RainChartWindowController">
+    <children>
+        <LineChart fx:id="rainChart" layoutX="10.0" layoutY="10.0" prefHeight="400.0" prefWidth="600.0">
+            <xAxis>
+                <CategoryAxis label="Data" />
+            </xAxis>
+            <yAxis>
+                <NumberAxis label="Opady (mm)" />
+            </yAxis>
+        </LineChart>
+    </children>
+</AnchorPane>

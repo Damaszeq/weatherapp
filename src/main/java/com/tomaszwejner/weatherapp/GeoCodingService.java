@@ -1,12 +1,12 @@
 package com.tomaszwejner.weatherapp;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class GeoCodingService {
 
@@ -52,7 +52,7 @@ public class GeoCodingService {
     // Metoda: współrzędne → nazwa miasta (reverse geocoding)
     public String getCityName(double lat, double lon) throws Exception {
         String urlStr = "https://nominatim.openstreetmap.org/reverse?format=json&lat="
-                + lat + "&lon=" + lon;
+                + lat + "&lon=" + lon + "&accept-language=pl";
 
         URL url = new URL(urlStr);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
