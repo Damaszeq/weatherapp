@@ -200,7 +200,7 @@ public class WeatherService {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return "Błąd podczas pobierania prognozy pogody.";
+            return "Błąd podczas pobierania prognozy pogody. Jeśli pobierasz prognozę pogody, spróbuj zmniejszając liczbę dni";
         }
     }
 }

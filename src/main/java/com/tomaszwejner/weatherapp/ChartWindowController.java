@@ -1,10 +1,13 @@
 package com.tomaszwejner.weatherapp;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Tooltip;
+import javafx.util.Duration;
 
 import java.util.List;
 
@@ -25,6 +28,7 @@ public class ChartWindowController {
     public void initialize() {
         xAxis.setLabel("Data");
         yAxis.setLabel("Wartość");
+
     }
 
     public void addSeries(String seriesName, List<String> xValues, List<Double> yValues) {
@@ -32,38 +36,30 @@ public class ChartWindowController {
         series.setName(seriesName);
 
         for (int i = 0; i < xValues.size() && i < yValues.size(); i++) {
-            series.getData().add(new XYChart.Data<>(xValues.get(i), yValues.get(i)));
+            String x = xValues.get(i);
+            Double y = yValues.get(i);
+
+            XYChart.Data<String, Number> dataPoint = new XYChart.Data<>(x, y);
+            series.getData().add(dataPoint);
         }
 
         lineChart.getData().add(series);
 
+        // Poczekaj, aż JavaFX stworzy węzły graficzne dla punktów
+        Platform.runLater(() -> {
+            for (int i = 0; i < series.getData().size(); i++) {
+                XYChart.Data<String, Number> dataPoint = series.getData().get(i);
+                String x = xValues.get(i);
+                Double y = yValues.get(i);
 
-    }
+                Tooltip tooltip = new Tooltip(x + ", " + y + "°C");
+                tooltip.setShowDelay(Duration.millis(100));
 
-    public void addRainSeries(List<String> xValues, List<String> rainValues, LineChart<String, Number> lineChart) {
-        XYChart.Series<String, Number> rainSeries = new XYChart.Series<>();
-        rainSeries.setName("Opady");
-
-        for (int i = 0; i < xValues.size(); i++) {
-            String rainStr = rainValues.get(i);
-            double rainDouble;
-
-            if ("brak".equalsIgnoreCase(rainStr)) {
-                rainDouble = 0.0;
-            } else {
-                try {
-                    rainDouble = Double.parseDouble(rainStr);
-                } catch (NumberFormatException e) {
-                    rainDouble = 0.0;
-                }
+                // Teraz node już istnieje
+                Tooltip.install(dataPoint.getNode(), tooltip);
             }
-
-            rainSeries.getData().add(new XYChart.Data<>(xValues.get(i), rainDouble));
-        }
-
-        lineChart.getData().add(rainSeries);
+        });
     }
-
 
     private String resultText;
 
