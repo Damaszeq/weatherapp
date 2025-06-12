@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -59,6 +60,9 @@ public class WeatherController {
 
     @FXML
     private CheckBox forecastCheckbox;
+
+    @FXML
+    private Button windChartButton;
 
     @FXML
     private ComboBox<Integer> forecastDaysComboBox;
@@ -244,6 +248,7 @@ public class WeatherController {
         List<String> dates = new ArrayList<>();
         List<Double> temps = new ArrayList<>();
         List<Double> rains = new ArrayList<>();
+        List<Double> winds = new ArrayList<>();
 
         String[] lines = text.split("\\r?\\n");
 
@@ -266,11 +271,13 @@ public class WeatherController {
                 // Przeszukaj linie między i+1 a nextDateIndex - 1
                 double temp = 0.0;
                 double rain = 0.0;
+                double wind = 0.0;
+
                 for (int j = i + 1; j < nextDateIndex; j++) {
-                    String currentLine = lines[j].trim();
+                    String currentLine = lines[j].trim().toLowerCase();
 
                     // Temperatura
-                    if (currentLine.toLowerCase().startsWith("temperatura")) {
+                    if (currentLine.startsWith("temperatura") && !currentLine.startsWith("temperatura gleby")) {
                         String tempStr = currentLine.replaceAll("[^0-9.,-]", "").replace(',', '.');
                         try {
                             temp = Double.parseDouble(tempStr);
@@ -280,7 +287,7 @@ public class WeatherController {
                     }
 
                     // Opady
-                    if (currentLine.toLowerCase().startsWith("opad")) {
+                    if (currentLine.startsWith("opad")) {
                         String rainStr = currentLine.replaceAll("[^0-9.,-]", "").replace(',', '.');
                         if (rainStr.isEmpty()) {
                             rain = 0.0;
@@ -292,16 +299,28 @@ public class WeatherController {
                             }
                         }
                     }
+
+                    // Wiatr
+                    if (currentLine.startsWith("wiatr")) {
+                        String windStr = currentLine.replaceAll("[^0-9.,-]", "").replace(',', '.');
+                        try {
+                            wind = Double.parseDouble(windStr);
+                        } catch (NumberFormatException e) {
+                            System.out.println("Nie udało się sparsować wiatru: " + windStr);
+                        }
+                    }
                 }
+
                 temps.add(temp);
                 rains.add(rain);
+                winds.add(wind);
             }
         }
 
         double currentTemp = temps.isEmpty() ? 0.0 : temps.get(0);
         String description = "Pogoda z resultLabel";
 
-        return new WeatherData(currentTemp, description, dates, temps, rains);
+        return new WeatherData(currentTemp, description, dates, temps, rains, winds);
     }
 
 
@@ -357,6 +376,28 @@ public class WeatherController {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    private void handleShowWindChart() {
+        WeatherData data = parseWeatherDataFromResultLabel();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/tomaszwejner/weatherapp/WindChart.fxml"));
+            Parent root = loader.load();
+
+            WindChartWindowController controller = loader.getController();
+            controller.setWindData(data.getForecastDates(), data.getForecastWinds());
+
+            Stage stage = new Stage();
+            stage.setTitle("Wykres prędkości wiatru");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }
 
 

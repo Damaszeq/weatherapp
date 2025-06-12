@@ -5,7 +5,7 @@
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.tomaszwejner.weatherapp.WeatherController"
-            prefHeight="600.0" prefWidth="900.0">
+            prefHeight="1200.0" prefWidth="900.0">
 
     <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="10">
 
@@ -23,9 +23,6 @@
                 <TextField fx:id="longitudeTextField" promptText="Długość" visible="false" />
                 <Button fx:id="getWeatherButton" text="Pobierz pogodę" onAction="#onGetWeatherClicked" />
             </HBox>
-            <Button fx:id="showChartButton" text="Pokaż wykres" onAction="#handleShowChart" alignment="CENTER_RIGHT" />
-            <Button text="Wykres Opadów" onAction="#handleShowRainChart" />
-
         </VBox>
 
         <!-- Sekcja wyboru danych pogodowych -->
@@ -48,11 +45,19 @@
                 <Label text="Liczba dni:"/>
                 <ComboBox fx:id="forecastDaysComboBox" prefWidth="80" />
             </HBox>
+
+            <!-- Tutaj przeniesione przyciski wykresów -->
+            <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0 0 0;">
+                <Button fx:id="showChartButton" text="Wykres temperatury" onAction="#handleShowChart" />
+                <Button text="Wykres Opadów" onAction="#handleShowRainChart" />
+                <Button text="Wykres prędkości wiatru" onAction="#handleShowWindChart" />
+            </HBox>
         </VBox>
 
 
+
         <!-- Pole tekstowe na wynik -->
-        <ScrollPane fitToWidth="true" prefHeight="200" VBox.vgrow="ALWAYS">
+        <ScrollPane fitToWidth="true" prefHeight="600" VBox.vgrow="ALWAYS">
             <content>
                 <Label fx:id="resultLabel" wrapText="true" />
             </content>

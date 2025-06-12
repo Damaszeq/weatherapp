@@ -4,15 +4,15 @@
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.layout.*?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.tomaszwejner.weatherapp.RainChartWindowController">
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.tomaszwejner.weatherapp.WindChartWindowController">
     <children>
-        <LineChart fx:id="rainChart" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+        <LineChart fx:id="windChart" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
                    AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
             <xAxis>
                 <CategoryAxis label="Data" />
             </xAxis>
             <yAxis>
-                <NumberAxis label="Opady (mm)" />
+                <NumberAxis label="Prędkość wiatru (km/h)" />
             </yAxis>
         </LineChart>
     </children>
