@@ -7,7 +7,9 @@
 <AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.tomaszwejner.weatherapp.PressureChartWindowController">
     <children>
         <LineChart fx:id="pressureChart" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
-                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                   prefHeight="600" prefWidth="900"
+        >
             <xAxis>
                 <CategoryAxis label="Data" />
             </xAxis>

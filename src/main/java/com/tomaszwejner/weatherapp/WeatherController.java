@@ -12,6 +12,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 public class WeatherController {
@@ -33,6 +35,9 @@ public class WeatherController {
 
     @FXML
     private Button getWeatherButton;
+
+    @FXML
+    private ComboBox<Integer> historicalDaysComboBox;
 
     @FXML
     private Label resultLabel;
@@ -95,27 +100,22 @@ public class WeatherController {
         });
 
         toggleInputFields();
-        historicalCheckbox.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
-            startDatePicker.setDisable(!isNowSelected);
-            endDatePicker.setDisable(!isNowSelected);
-        });
-        startDatePicker.setDisable(true);
-        endDatePicker.setDisable(true);
-        startDatePicker.setValue(LocalDate.now().minusDays(3));
-        endDatePicker.setValue(LocalDate.now());
-        startDatePicker.setDayCellFactory(picker -> new DateCell() {
-            @Override
-            public void updateItem(LocalDate date, boolean empty) {
-                super.updateItem(date, empty);
-                setDisable(empty || date.isAfter(LocalDate.now()));
+
+        // Inicjalizacja comboBox z dniami historycznymi, np. 1 do 30 dni
+        historicalDaysComboBox.getItems().addAll(
+                IntStream.rangeClosed(1, 30).boxed().collect(Collectors.toList())
+        );
+        historicalDaysComboBox.setValue(3); // domyślnie 3 dni historyczne
+
+        forecastCheckbox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                historicalCheckbox.setSelected(false);
             }
         });
 
-        endDatePicker.setDayCellFactory(picker -> new DateCell() {
-            @Override
-            public void updateItem(LocalDate date, boolean empty) {
-                super.updateItem(date, empty);
-                setDisable(empty || date.isAfter(LocalDate.now()));
+        historicalCheckbox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                forecastCheckbox.setSelected(false);
             }
         });
 
@@ -132,6 +132,14 @@ public class WeatherController {
 
         // Wyłącz ComboBox jeśli checkbox nie jest zaznaczony na start
         forecastDaysComboBox.setDisable(!forecastCheckbox.isSelected());
+
+        // Możesz też dodać listener, żeby ComboBox był aktywny tylko, gdy checkbox jest zaznaczony
+        historicalCheckbox.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
+            historicalDaysComboBox.setDisable(!isNowSelected);
+        });
+
+        // Wyłącz ComboBox jeśli checkbox nie jest zaznaczony na start
+        historicalDaysComboBox.setDisable(!historicalCheckbox.isSelected());
     }
 
 
@@ -221,19 +229,26 @@ public class WeatherController {
             List<String> selectedParameters = getSelectedParameters();
 
             boolean forecast = forecastCheckbox.isSelected();
+            boolean historical = historicalCheckbox.isSelected(); // nowa zmienna
             int forecastDays = forecastDaysComboBox.getValue();
 
             if (cityRadioButton.isSelected()) {
                 String city = cityTextField.getText();
                 if (city == null || city.isEmpty()) {
-                    resultLabel.setText("Podaj nazwę miasta.");
+                    resultLabel.setText("Podaj nazwę miasta lub zmień tryb na współrzędne.");
                     return;
                 }
 
                 Coordinates coords = geoCodingService.getCoordinates(city);
                 String weather;
 
-                if (forecast) {
+                if (historical) {
+                    int pastDays = historicalDaysComboBox.getValue();
+                    weather = weatherService.getHistoricalWeather(coords.latitude, coords.longitude, selectedParameters, pastDays);
+
+                    resultLabel.setText("Ostatnie " + pastDays + " dni dla " + city + ":\n" + weather);
+                }
+else if (forecast) {
                     LocalDate today = LocalDate.now();
                     LocalDate endDate = today.plusDays(forecastDays);
                     String startDateStr = getFormattedDate(today);
@@ -264,18 +279,23 @@ public class WeatherController {
                     return;
                 }
 
-                // **Tu wywołujemy reverse geocoding, żeby poznać nazwę najbliższego miasta**
                 String cityName = "Nieznana lokalizacja";
                 try {
                     cityName = geoCodingService.getCityName(lat, lon);
                 } catch (Exception e) {
-                    // Jeśli coś pójdzie nie tak, wyświetlamy "Nieznana lokalizacja"
                     System.err.println("Błąd reverse geocoding: " + e.getMessage());
                 }
 
                 String weather;
 
-                if (forecast) {
+                if (historical) {
+                    int pastDays = historicalDaysComboBox.getValue();
+
+                    weather = weatherService.getHistoricalWeather(lat, lon, selectedParameters, pastDays);
+
+                    resultLabel.setText("Ostatnie " + pastDays + " dni dla współrzędnych: " + lat + ", " + lon + " (" + cityName + "):\n" + weather);
+                }
+ else if (forecast) {
                     LocalDate today = LocalDate.now();
                     LocalDate endDate = today.plusDays(forecastDays);
                     String startDateStr = getFormattedDate(today);

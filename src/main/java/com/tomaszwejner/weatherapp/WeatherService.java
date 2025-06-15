@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -203,4 +204,96 @@ public class WeatherService {
             return "Błąd podczas pobierania prognozy pogody. Jeśli pobierasz prognozę pogody, spróbuj zmniejszając liczbę dni";
         }
     }
+    public String getHistoricalWeather(double latitude, double longitude, List<String> parameters, int pastDays) {
+        try {
+            StringBuilder apiUrl = new StringBuilder("https://api.open-meteo.com/v1/forecast");
+            apiUrl.append("?latitude=").append(latitude);
+            apiUrl.append("&longitude=").append(longitude);
+            apiUrl.append("&past_days=").append(pastDays);
+            if (!parameters.isEmpty()) {
+                String joinedParams = String.join(",", parameters);
+                apiUrl.append("&hourly=").append(joinedParams);
+            }
+
+            URL url = new URL(apiUrl.toString());
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode != 200) {
+                throw new RuntimeException("HTTP GET Request Failed with Error code : " + responseCode);
+            }
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder response = new StringBuilder();
+            String inputLine;
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            JSONObject json = new JSONObject(response.toString());
+
+            if (!json.has("hourly")) {
+                return "Brak danych historycznych dla wybranych parametrów.";
+            }
+
+            JSONObject hourly = json.getJSONObject("hourly");
+            JSONArray timeArray = hourly.getJSONArray("time");
+
+            StringBuilder result = new StringBuilder();
+
+            for (int i = 0; i < timeArray.length(); i++) {
+                String time = timeArray.getString(i);
+                LocalDateTime dateTime = LocalDateTime.parse(time);
+
+                // odrzucamy dane, które są po wczoraj
+                if (dateTime.toLocalDate().isAfter(LocalDate.now().minusDays(1))) {
+                    continue;  // pomijamy te dane (czyli przyszłe)
+                }
+
+                // dalej Twój istniejący kod formatowania i wypisywania danych
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM HH:mm", new Locale("pl"));
+                String formattedTime = dateTime.format(formatter);
+
+                result.append(formattedTime).append(":\n");
+
+                for (String param : parameters) {
+                    if (hourly.has(param)) {
+                        JSONArray paramArray = hourly.getJSONArray(param);
+                        Object val = paramArray.get(i);
+
+                        String formattedValue;
+                        if (val == JSONObject.NULL) {
+                            formattedValue = "brak danych";
+                        } else if (val instanceof Number) {
+                            double number = ((Number) val).doubleValue();
+
+                            if (param.toLowerCase().contains("precipitation") && number == 0.0) {
+                                formattedValue = "brak";
+                            } else {
+                                formattedValue = number + getUnitForParameter(param);
+                            }
+                        } else {
+                            formattedValue = val.toString();
+                        }
+
+                        result.append("  ").append(getLabelForParameter(param)).append(": ").append(formattedValue).append("\n");
+                    }
+                }
+
+                result.append("\n");
+            }
+
+
+            return result.toString();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Błąd podczas pobierania danych historycznych.";
+        }
+    }
+
+
 }

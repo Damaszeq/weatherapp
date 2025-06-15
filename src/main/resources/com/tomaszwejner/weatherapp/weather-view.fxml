@@ -21,7 +21,11 @@
                 <TextField fx:id="cityTextField" promptText="Wpisz miasto..." />
                 <TextField fx:id="latitudeTextField" promptText="Szerokość" visible="false" />
                 <TextField fx:id="longitudeTextField" promptText="Długość" visible="false" />
-                <Button fx:id="getWeatherButton" text="Pobierz pogodę" onAction="#onGetWeatherClicked" />
+
+                <Region HBox.hgrow="ALWAYS" />
+
+                <Button fx:id="getWeatherButton" text="Pobierz pogodę" onAction="#onGetWeatherClicked" prefWidth="140" />
+
             </HBox>
         </VBox>
 
@@ -51,12 +55,11 @@
             <VBox spacing="5" style="-fx-padding: 10 0 0 0;">
                 <CheckBox fx:id="historicalCheckbox" text="Pokaż dane historyczne" />
                 <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Label text="Data początkowa:"/>
-                    <DatePicker fx:id="startDatePicker" />
-                    <Label text="Data końcowa:"/>
-                    <DatePicker fx:id="endDatePicker"/>
+                    <Label text="Liczba dni historycznych:"/>
+                    <ComboBox fx:id="historicalDaysComboBox" prefWidth="80" />
                 </HBox>
             </VBox>
+
 
             <!-- Przycisk wykresów -->
             <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0 0 0;">
