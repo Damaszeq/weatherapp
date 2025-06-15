@@ -255,10 +255,10 @@ else if (forecast) {
                     String endDateStr = getFormattedDate(endDate);
 
                     weather = weatherService.getWeatherForecast(coords.latitude, coords.longitude, selectedParameters, startDateStr, endDateStr);
-                    resultLabel.setText("Prognoza pogody w " + city + " na " + forecastDays + " dni:\n" + weather);
+                    resultLabel.setText("Prognoza pogody dla " + city + " na " + forecastDays + " dni:\n" + weather);
                 } else {
                     weather = weatherService.getCurrentWeather(coords.latitude, coords.longitude, selectedParameters);
-                    resultLabel.setText("Pogoda w " + city + ":\n" + weather);
+                    resultLabel.setText("Pogoda dla " + city + ":\n" + weather);
                 }
 
             } else if (coordsRadioButton.isSelected()) {
@@ -325,6 +325,27 @@ else if (forecast) {
         List<Double> pressures = new ArrayList<>();
 
         String[] lines = text.split("\\r?\\n");
+
+        String cityName = "Nieznane miasto";
+        if (lines.length > 0) {
+            String header = lines[0];
+
+            if (header.toLowerCase().startsWith("prognoza pogody dla")) {
+                int start = header.toLowerCase().indexOf("dla") + 4;
+                int end = header.toLowerCase().lastIndexOf(" na ");
+                if (start > 3 && end > start) {
+                    cityName = header.substring(start, end).trim();
+                }
+            } else if (header.toLowerCase().startsWith("ostatnie")) {
+                int start = header.toLowerCase().indexOf("dla") + 4;
+                int end = header.indexOf(":", start);
+                if (start > 3 && end > start) {
+                    cityName = header.substring(start, end).trim();
+                } else {
+                    cityName = header.substring(start).trim(); // fallback jeśli brak ':'
+                }
+            }
+        }
 
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].trim();
@@ -405,7 +426,14 @@ else if (forecast) {
         double currentTemp = temps.isEmpty() ? 0.0 : temps.get(0);
         String description = "Pogoda z resultLabel";
 
-        return new WeatherData(currentTemp, description, dates, temps, rains, winds, pressures);
+        WeatherData weatherData = new WeatherData(currentTemp, description, dates, temps, rains, winds, pressures);
+        weatherData.setCityName(cityName);
+        if (!dates.isEmpty()) {
+            weatherData.setStartDate(dates.get(0));
+            weatherData.setEndDate(dates.get(dates.size() - 1));
+        }
+
+        return weatherData;
     }
 
 
@@ -422,7 +450,7 @@ else if (forecast) {
             Parent root = loader.load();
 
             ChartWindowController chartController = loader.getController();
-            chartController.setCityName("Warszawa"); // lub przekazuj dynamicznie nazwę miasta
+            chartController.setMetadata(data.getCityName(), data.getStartDate(), data.getEndDate());
 
             if (data == null || !data.hasForecast()) {
                 System.out.println("Brak danych do wyświetlenia wykresu.");

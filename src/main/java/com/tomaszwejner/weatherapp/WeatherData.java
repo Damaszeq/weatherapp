@@ -31,6 +31,14 @@ public class WeatherData {
         this.forecastPressures = forecastPressures;
     }
 
+    public String getCityName() {
+        return cityName;
+    }
+
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
+    }
+
     public double getTemperature() {
         return temperature;
     }
@@ -58,6 +66,12 @@ public class WeatherData {
     public List<Double> getForecastPressures() {  // getter dla ciśnienia
         return forecastPressures;
     }
+
+    public String getStartDate() { return startDate; }
+    public void setStartDate(String startDate) { this.startDate = startDate; }
+
+    public String getEndDate() { return endDate; }
+    public void setEndDate(String endDate) { this.endDate = endDate; }
 
     public boolean hasForecast() {
         return forecastDates != null && !forecastDates.isEmpty()

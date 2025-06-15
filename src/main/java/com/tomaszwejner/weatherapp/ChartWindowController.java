@@ -31,6 +31,8 @@ public class ChartWindowController {
     @FXML
     private NumberAxis yAxis;
     private String cityName;
+    private String startDate;
+    private String endDate;
 
     @FXML
     public void initialize() {
@@ -51,9 +53,28 @@ public class ChartWindowController {
         return cityName;
     }
 
+    private String simplifyDateForTitle(String input) {
+        String[] parts = input.split(" ");
+        if (parts.length >= 2) {
+            return parts[0] + " " + parts[1]; // "13 czerwca 12:00" -> "13 czerwca"
+        }
+        return input;
+    }
+
+
     public void setMetadata(String cityName, String startDate, String endDate) {
         this.cityName = cityName;
+        this.startDate = startDate;
+        this.endDate = endDate;
+
+        if (chartTitleLabel != null) {
+            String simplifiedStart = simplifyDateForTitle(startDate);
+            String simplifiedEnd = simplifyDateForTitle(endDate);
+            chartTitleLabel.setText(String.format("Pogoda w %s od %s do %s", cityName, simplifiedStart, simplifiedEnd));
+        }
+
     }
+
 
     public void addSeries(String seriesName, List<String> xValues, List<Double> yValues) {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
@@ -130,11 +151,6 @@ public class ChartWindowController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Zapisz dane wykresu");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Plik tekstowy", "*.txt"));
-        // Przykładowe dane do nazwy pliku — pobierz je dynamicznie z kontrolera, jeśli masz
-        String cityName = "Warszawa"; // lub inna zmienna z Twoich danych
-        String startDate = "2025-06-01";
-        String endDate = "2025-06-07";
-
         String defaultFileName = String.format("Weather_%s_from_%s_to_%s.txt", cityName, startDate, endDate);
         fileChooser.setInitialFileName(defaultFileName);
         File file = fileChooser.showSaveDialog(lineChart.getScene().getWindow()); // lub inny parent
