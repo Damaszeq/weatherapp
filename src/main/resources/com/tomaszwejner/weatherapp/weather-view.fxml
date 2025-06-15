@@ -40,13 +40,25 @@
                 <Button fx:id="selectAllButton" text="Zaznacz wszystko" onAction="#onSelectAllClicked" />
             </HBox>
 
+            <!-- Sekcja prognozy -->
             <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0 0 0;">
                 <CheckBox fx:id="forecastCheckbox" text="Pokaż prognozę"/>
                 <Label text="Liczba dni:"/>
                 <ComboBox fx:id="forecastDaysComboBox" prefWidth="80" />
             </HBox>
 
-            <!-- Tutaj przeniesione przyciski wykresów -->
+            <!-- Sekcja danych historycznych -->
+            <VBox spacing="5" style="-fx-padding: 10 0 0 0;">
+                <CheckBox fx:id="historicalCheckbox" text="Pokaż dane historyczne" />
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Data początkowa:"/>
+                    <DatePicker fx:id="startDatePicker" />
+                    <Label text="Data końcowa:"/>
+                    <DatePicker fx:id="endDatePicker"/>
+                </HBox>
+            </VBox>
+
+            <!-- Przycisk wykresów -->
             <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0 0 0;">
                 <Button fx:id="showChartButton" text="Wykres temperatury" onAction="#handleShowChart" />
                 <Button text="Wykres Opadów" onAction="#handleShowRainChart" />
@@ -54,8 +66,6 @@
                 <Button text="Wykres ciśnienia" onAction="#handleShowPressureChart" />
             </HBox>
         </VBox>
-
-
 
         <!-- Pole tekstowe na wynik -->
         <ScrollPane fitToWidth="true" prefHeight="600" VBox.vgrow="ALWAYS">

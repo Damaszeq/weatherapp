@@ -50,6 +50,16 @@ public class WeatherController {
     private CheckBox rainCheckbox;
 
     @FXML
+    private CheckBox historicalCheckbox;
+
+    @FXML
+    private DatePicker startDatePicker;
+
+    @FXML
+    private DatePicker endDatePicker;
+
+
+    @FXML
     private CheckBox pressureCheckbox;
 
     @FXML
@@ -85,6 +95,29 @@ public class WeatherController {
         });
 
         toggleInputFields();
+        historicalCheckbox.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
+            startDatePicker.setDisable(!isNowSelected);
+            endDatePicker.setDisable(!isNowSelected);
+        });
+        startDatePicker.setDisable(true);
+        endDatePicker.setDisable(true);
+        startDatePicker.setValue(LocalDate.now().minusDays(3));
+        endDatePicker.setValue(LocalDate.now());
+        startDatePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                setDisable(empty || date.isAfter(LocalDate.now()));
+            }
+        });
+
+        endDatePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                setDisable(empty || date.isAfter(LocalDate.now()));
+            }
+        });
 
         forecastDaysComboBox.getItems().clear();
         for (int i = 1; i <= 16; i++) {
@@ -119,6 +152,26 @@ public class WeatherController {
         // Czyść labelkę przy zmianie metody wyszukiwania
         resultLabel.setText("");
     }
+
+    @FXML
+    private void handleHistoricalDataRequest() {
+        LocalDate start = startDatePicker.getValue();
+        LocalDate end = endDatePicker.getValue();
+
+        if (start == null || end == null) {
+            resultLabel.setText("Wybierz obie daty.");
+            return;
+        }
+
+        if (start.isAfter(end)) {
+            resultLabel.setText("Data początkowa nie może być po dacie końcowej.");
+            return;
+        }
+
+        resultLabel.setText("Wybrano zakres danych historycznych od " + getFormattedDate(start) +
+                " do " + getFormattedDate(end) + ".\n(Pobieranie danych w przyszłym kroku)");
+    }
+
 
     @FXML
     private void onSelectAllClicked() {
