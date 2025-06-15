@@ -422,6 +422,7 @@ else if (forecast) {
             Parent root = loader.load();
 
             ChartWindowController chartController = loader.getController();
+            chartController.setCityName("Warszawa"); // lub przekazuj dynamicznie nazwę miasta
 
             if (data == null || !data.hasForecast()) {
                 System.out.println("Brak danych do wyświetlenia wykresu.");

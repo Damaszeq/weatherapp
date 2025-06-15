@@ -6,6 +6,10 @@ public class WeatherData {
     private final double temperature;
     private final String description;
 
+    private String cityName;
+    private String startDate;
+    private String endDate;
+
     private final List<String> forecastDates;
     private final List<Double> forecastTemperatures;
     private final List<Double> forecastRains;

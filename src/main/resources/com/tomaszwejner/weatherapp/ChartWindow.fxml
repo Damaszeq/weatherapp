@@ -4,6 +4,9 @@
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.tomaszwejner.weatherapp.ChartWindowController"
@@ -11,7 +14,9 @@
     <padding>
         <Insets top="10" right="10" bottom="10" left="10"/>
     </padding>
-
+    <HBox alignment="CENTER">
+        <Label fx:id="chartTitleLabel" text="Wykres pogody" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+    </HBox>
     <LineChart fx:id="lineChart" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" prefHeight="600" prefWidth="900">
         <xAxis>
             <CategoryAxis fx:id="xAxis"/>
@@ -20,6 +25,10 @@
             <NumberAxis fx:id="yAxis"/>
         </yAxis>
     </LineChart>
+
+    <Button text="Eksportuj dane" onAction="#onExportDataClicked"/>
+
+
 
 
 </VBox>
