@@ -478,8 +478,8 @@ else if (forecast) {
             Parent root = loader.load();
 
             RainChartWindowController rainController = loader.getController();
-
-            rainController.setRainData(data.getForecastDates(), data.getForecastRains());
+            rainController.setMetadata(data.getCityName(), data.getStartDate(), data.getEndDate());
+            rainController.addSeries(data.getForecastDates(), data.getForecastRains());
 
             Stage stage = new Stage();
             stage.setTitle("Wykres opadów");

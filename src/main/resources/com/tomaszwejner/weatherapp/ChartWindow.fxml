@@ -27,8 +27,4 @@
     </LineChart>
 
     <Button text="Eksportuj dane" onAction="#onExportDataClicked"/>
-
-
-
-
 </VBox>
