@@ -151,7 +151,7 @@ public class ChartWindowController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Zapisz dane wykresu");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Plik tekstowy", "*.txt"));
-        String defaultFileName = String.format("Weather_%s_from_%s_to_%s.txt", cityName, startDate, endDate);
+        String defaultFileName = String.format("Temperature_%s_from_%s_to_%s.txt", cityName, startDate, endDate);
         fileChooser.setInitialFileName(defaultFileName);
         File file = fileChooser.showSaveDialog(lineChart.getScene().getWindow()); // lub inny parent
 
