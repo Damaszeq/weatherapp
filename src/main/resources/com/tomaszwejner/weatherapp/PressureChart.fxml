@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.layout.*?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.tomaszwejner.weatherapp.PressureChartWindowController">
+    <children>
+        <LineChart fx:id="pressureChart" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+            <xAxis>
+                <CategoryAxis label="Data" />
+            </xAxis>
+            <yAxis>
+                <NumberAxis label="Ciśnienie (hPa)" />
+            </yAxis>
+        </LineChart>
+    </children>
+</AnchorPane>

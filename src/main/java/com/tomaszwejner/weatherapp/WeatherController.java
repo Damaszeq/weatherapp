@@ -249,6 +249,7 @@ public class WeatherController {
         List<Double> temps = new ArrayList<>();
         List<Double> rains = new ArrayList<>();
         List<Double> winds = new ArrayList<>();
+        List<Double> pressures = new ArrayList<>();
 
         String[] lines = text.split("\\r?\\n");
 
@@ -272,6 +273,7 @@ public class WeatherController {
                 double temp = 0.0;
                 double rain = 0.0;
                 double wind = 0.0;
+                double press = 0.0;
 
                 for (int j = i + 1; j < nextDateIndex; j++) {
                     String currentLine = lines[j].trim().toLowerCase();
@@ -309,18 +311,28 @@ public class WeatherController {
                             System.out.println("Nie udało się sparsować wiatru: " + windStr);
                         }
                     }
+                    // Ciśnienie
+                    if (currentLine.startsWith("ciśnienie")) {
+                        String pressStr = currentLine.replaceAll("[^0-9.,-]", "").replace(',', '.');
+                        try {
+                            press = Double.parseDouble(pressStr);
+                        } catch (NumberFormatException e) {
+                            System.out.println("Nie udało się sparsować cisnienia: " + pressStr);
+                        }
+                    }
                 }
 
                 temps.add(temp);
                 rains.add(rain);
                 winds.add(wind);
+                pressures.add(press);
             }
         }
 
         double currentTemp = temps.isEmpty() ? 0.0 : temps.get(0);
         String description = "Pogoda z resultLabel";
 
-        return new WeatherData(currentTemp, description, dates, temps, rains, winds);
+        return new WeatherData(currentTemp, description, dates, temps, rains, winds, pressures);
     }
 
 
@@ -389,6 +401,26 @@ public class WeatherController {
 
             Stage stage = new Stage();
             stage.setTitle("Wykres prędkości wiatru");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleShowPressureChart() {
+        WeatherData data = parseWeatherDataFromResultLabel();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/tomaszwejner/weatherapp/PressureChart.fxml"));
+            Parent root = loader.load();
+
+            PressureChartWindowController controller = loader.getController();
+            controller.setPressData(data.getForecastDates(), data.getForecastPressures());
+
+            Stage stage = new Stage();
+            stage.setTitle("Wykres ciśnienia");
             stage.setScene(new Scene(root));
             stage.show();
 
