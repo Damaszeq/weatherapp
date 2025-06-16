@@ -499,6 +499,7 @@ else if (forecast) {
             Parent root = loader.load();
 
             WindChartWindowController controller = loader.getController();
+            controller.setMetadata(data.getCityName(), data.getStartDate(), data.getEndDate());
             controller.setWindData(data.getForecastDates(), data.getForecastWinds());
 
             Stage stage = new Stage();
