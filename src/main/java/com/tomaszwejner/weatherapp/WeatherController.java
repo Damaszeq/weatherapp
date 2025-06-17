@@ -520,6 +520,7 @@ else if (forecast) {
             Parent root = loader.load();
 
             PressureChartWindowController controller = loader.getController();
+            controller.setMetadata(data.getCityName(), data.getStartDate(), data.getEndDate());
             controller.setPressData(data.getForecastDates(), data.getForecastPressures());
 
             Stage stage = new Stage();
