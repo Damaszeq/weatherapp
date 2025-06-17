@@ -66,6 +66,13 @@
             <version>20210307</version>
         </dependency>
 
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>5.1.0</version>
+        </dependency>
+
+
         <!-- Testy -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

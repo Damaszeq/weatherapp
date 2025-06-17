@@ -2,6 +2,7 @@ package com.tomaszwejner.weatherapp;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import redis.clients.jedis.Jedis;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -15,6 +16,8 @@ import java.util.Locale;
 
 public class WeatherService {
 
+    private final Jedis jedis = new Jedis("localhost", 6379);
+    private final int DEFAULT_TTL_SECONDS = 3600; // 1 godzina
     // Metoda pomocnicza: zwraca polską etykietę dla danego parametru pogodowego
     private String getLabelForParameter(String param) {
         return switch (param) {
@@ -26,6 +29,14 @@ public class WeatherService {
             case "surface_pressure" -> "Ciśnienie";
             default -> param; // Jeśli brak dopasowania, zwraca oryginalną nazwę
         };
+    }
+
+    private String generateCacheKey(String prefix, double latitude, double longitude, List<String> parameters, String... extra) {
+        String key = prefix + ":" + latitude + ":" + longitude + ":" + String.join(",", parameters);
+        for (String s : extra) {
+            key += ":" + s;
+        }
+        return key;
     }
 
     // Metoda pomocnicza: zwraca jednostkę miary dla danego parametru pogodowego
@@ -43,6 +54,11 @@ public class WeatherService {
     // METODA 1: Pobiera aktualne dane pogodowe z API Open-Meteo
     public String getCurrentWeather(double latitude, double longitude, List<String> parameters) {
         try {
+            String cacheKey = generateCacheKey("current", latitude, longitude, parameters);
+            String cached = jedis.get(cacheKey);
+            if (cached != null) {
+                return cached + " (z cache)\n";
+            }
             // Budujemy URL zapytania
             StringBuilder apiUrl = new StringBuilder("https://api.open-meteo.com/v1/forecast");
             apiUrl.append("?latitude=").append(latitude);
@@ -120,7 +136,9 @@ public class WeatherService {
                 result.append("Brak danych pogodowych dla wybranych parametrów.");
             }
 
-            return result.toString();
+            String resultStr = result.toString();
+            jedis.setex(cacheKey, DEFAULT_TTL_SECONDS, resultStr);
+            return resultStr;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -130,6 +148,10 @@ public class WeatherService {
 
     // METODA 2: Pobiera prognozę pogody w przedziale dat (z API)
     public String getWeatherForecast(double latitude, double longitude, List<String> parameters, String startDate, String endDate) {
+        String cacheKey = generateCacheKey("forecast", latitude, longitude, parameters, startDate, endDate);
+        String cached = jedis.get(cacheKey);
+        if (cached != null) {
+            return cached + " (z cache)\n";}
         try {
             // Budujemy URL zapytania z datami
             StringBuilder apiUrl = new StringBuilder("https://api.open-meteo.com/v1/forecast");
@@ -211,7 +233,9 @@ public class WeatherService {
                 result.append("\n");
             }
 
-            return result.toString();
+            String resultStr = result.toString();
+            jedis.setex(cacheKey, DEFAULT_TTL_SECONDS, resultStr);
+            return resultStr;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -221,6 +245,11 @@ public class WeatherService {
 
     // METODA 3: Pobiera dane historyczne pogodowe z ostatnich N dni
     public String getHistoricalWeather(double latitude, double longitude, List<String> parameters, int pastDays) {
+        String cacheKey = generateCacheKey("history", latitude, longitude, parameters, String.valueOf(pastDays));
+        String cached = jedis.get(cacheKey);
+        if (cached != null) {
+            return cached + " (z cache)\n";
+        }
         try {
             // Budujemy URL z parametrem past_days
             StringBuilder apiUrl = new StringBuilder("https://api.open-meteo.com/v1/forecast");
@@ -301,7 +330,9 @@ public class WeatherService {
                 result.append("\n");
             }
 
-            return result.toString();
+            String resultStr = result.toString();
+            jedis.setex(cacheKey, 43200, resultStr); // 12h TTL
+            return resultStr;
 
         } catch (Exception e) {
             e.printStackTrace();
