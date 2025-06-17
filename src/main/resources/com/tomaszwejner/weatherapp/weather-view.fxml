@@ -67,6 +67,9 @@
                 <Button text="Wykres Opadów" onAction="#handleShowRainChart" />
                 <Button text="Wykres prędkości wiatru" onAction="#handleShowWindChart" />
                 <Button text="Wykres ciśnienia" onAction="#handleShowPressureChart" />
+
+                <Label fx:id="errorLabel" text="" textFill="red" />
+
             </HBox>
         </VBox>
 

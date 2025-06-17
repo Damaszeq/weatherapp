@@ -113,6 +113,8 @@ public class RainChartWindowController {
 
         if (file != null) {
             try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
+                writer.println("Miasto: " + (cityName != null ? cityName : "Nieznane"));
+                writer.println();
                 for (XYChart.Series<String, Number> series : rainChart.getData()) {
                     writer.println("Seria: " + series.getName());
                     writer.println("Data;Opady (mm)");

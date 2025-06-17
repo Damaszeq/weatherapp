@@ -63,6 +63,8 @@ public class WeatherController {
     @FXML
     private DatePicker endDatePicker;
 
+    @FXML
+    private Label errorLabel;
 
     @FXML
     private CheckBox pressureCheckbox;
