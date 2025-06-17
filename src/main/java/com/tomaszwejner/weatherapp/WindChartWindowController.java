@@ -83,6 +83,7 @@ public class WindChartWindowController {
             }
         });
     }
+    //Esksport danych
     @FXML
     private void onExportDataClicked() {
         FileChooser fileChooser = new FileChooser();

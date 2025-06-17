@@ -198,7 +198,10 @@ public class ChartWindowController {
                     writer.println("Seria: " + series.getName());
                     writer.println("Czas;Wartość");
                     for (XYChart.Data<String, Number> data : series.getData()) {
-                        writer.println(data.getXValue() + ";" + data.getYValue());
+                        Number value = data.getYValue();
+                        if (value != null && value.doubleValue() != 0.0) {
+                            writer.println(data.getXValue() + ";" + value);
+                        }
                     }
                     writer.println();
                 }

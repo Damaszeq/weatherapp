@@ -39,14 +39,6 @@ public class WeatherData {
         this.cityName = cityName;
     }
 
-    public double getTemperature() {
-        return temperature;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
     public List<String> getForecastDates() {
         return forecastDates;
     }

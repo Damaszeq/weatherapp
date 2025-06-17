@@ -34,9 +34,6 @@ public class WeatherController {
     private TextField longitudeTextField;
 
     @FXML
-    private Button getWeatherButton;
-
-    @FXML
     private ComboBox<Integer> historicalDaysComboBox;
 
     @FXML
@@ -58,28 +55,13 @@ public class WeatherController {
     private CheckBox historicalCheckbox;
 
     @FXML
-    private DatePicker startDatePicker;
-
-    @FXML
-    private DatePicker endDatePicker;
-
-    @FXML
-    private Label errorLabel;
-
-    @FXML
     private CheckBox pressureCheckbox;
 
     @FXML
     private Button selectAllButton;
 
     @FXML
-    private Button showChartButton;
-
-    @FXML
     private CheckBox forecastCheckbox;
-
-    @FXML
-    private Button windChartButton;
 
     @FXML
     private ComboBox<Integer> forecastDaysComboBox;
@@ -164,26 +146,6 @@ public class WeatherController {
     }
 
     @FXML
-    private void handleHistoricalDataRequest() {
-        LocalDate start = startDatePicker.getValue();
-        LocalDate end = endDatePicker.getValue();
-
-        if (start == null || end == null) {
-            resultLabel.setText("Wybierz obie daty.");
-            return;
-        }
-
-        if (start.isAfter(end)) {
-            resultLabel.setText("Data początkowa nie może być po dacie końcowej.");
-            return;
-        }
-
-        resultLabel.setText("Wybrano zakres danych historycznych od " + getFormattedDate(start) +
-                " do " + getFormattedDate(end) + ".\n(Pobieranie danych w przyszłym kroku)");
-    }
-
-
-    @FXML
     private void onSelectAllClicked() {
         boolean allSelected = temperatureCheckbox.isSelected()
                 && soilTempCheckbox.isSelected()
@@ -208,6 +170,7 @@ public class WeatherController {
     }
 
 
+    //Pobieranie wybranych parametrów
     @FXML
     private List<String> getSelectedParameters() {
         List<String> parameters = new ArrayList<>();
@@ -225,13 +188,14 @@ public class WeatherController {
         return date.format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
+    //Pobierz pogodę
     @FXML
     private void onGetWeatherClicked() {
         try {
             List<String> selectedParameters = getSelectedParameters();
 
             boolean forecast = forecastCheckbox.isSelected();
-            boolean historical = historicalCheckbox.isSelected(); // nowa zmienna
+            boolean historical = historicalCheckbox.isSelected();
             int forecastDays = forecastDaysComboBox.getValue();
 
             if (cityRadioButton.isSelected()) {
@@ -318,6 +282,7 @@ else if (forecast) {
         }
     }
 
+    //Tworzenie wektora danych potrzebnych do wykresu
     private WeatherData parseWeatherDataFromResultLabel() {
         String text = resultLabel.getText();
         List<String> dates = new ArrayList<>();
@@ -440,6 +405,7 @@ else if (forecast) {
 
 
 
+    //Wykres temperatury
     @FXML
     public void handleShowChart() {
         WeatherData data = parseWeatherDataFromResultLabel();
@@ -458,7 +424,6 @@ else if (forecast) {
                 System.out.println("Brak danych do wyświetlenia wykresu.");
             } else {
                 chartController.addSeries("Prognoza temperatury", data.getForecastDates(), data.getForecastTemperatures());
-                //chartController.addSeries("Opady", data.getForecastDates(), data.getForecastRains());
             }
 
             Stage stage = new Stage();

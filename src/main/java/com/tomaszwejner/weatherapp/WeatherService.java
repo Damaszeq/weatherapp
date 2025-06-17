@@ -15,6 +15,7 @@ import java.util.Locale;
 
 public class WeatherService {
 
+    // Metoda pomocnicza: zwraca polską etykietę dla danego parametru pogodowego
     private String getLabelForParameter(String param) {
         return switch (param) {
             case "temperature_2m" -> "Temperatura";
@@ -23,10 +24,11 @@ public class WeatherService {
             case "windspeed_10m" -> "Wiatr";
             case "precipitation" -> "Opady";
             case "surface_pressure" -> "Ciśnienie";
-            default -> param;
+            default -> param; // Jeśli brak dopasowania, zwraca oryginalną nazwę
         };
     }
 
+    // Metoda pomocnicza: zwraca jednostkę miary dla danego parametru pogodowego
     private String getUnitForParameter(String param) {
         return switch (param) {
             case "temperature_2m" -> " °C";
@@ -38,12 +40,15 @@ public class WeatherService {
         };
     }
 
+    // METODA 1: Pobiera aktualne dane pogodowe z API Open-Meteo
     public String getCurrentWeather(double latitude, double longitude, List<String> parameters) {
         try {
+            // Budujemy URL zapytania
             StringBuilder apiUrl = new StringBuilder("https://api.open-meteo.com/v1/forecast");
             apiUrl.append("?latitude=").append(latitude);
             apiUrl.append("&longitude=").append(longitude);
 
+            // Jeśli są parametry - dodajemy je do zapytania
             if (!parameters.isEmpty()) {
                 String joinedParams = String.join(",", parameters);
                 apiUrl.append("&current_weather=true");
@@ -52,28 +57,32 @@ public class WeatherService {
                 apiUrl.append("&current_weather=true");
             }
 
+            // Tworzymy połączenie HTTP i wykonujemy żądanie GET
             URL url = new URL(apiUrl.toString());
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
+            // Obsługa błędów sieciowych
             int responseCode = conn.getResponseCode();
             if (responseCode != 200) {
                 throw new RuntimeException("HTTP GET Request Failed with Error code : " + responseCode);
             }
 
+            // Odczyt odpowiedzi z API
             BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             StringBuilder response = new StringBuilder();
             String inputLine;
-
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
             }
             in.close();
 
+            // Parsowanie odpowiedzi JSON
             JSONObject json = new JSONObject(response.toString());
             JSONObject currentWeather = json.getJSONObject("current_weather");
             StringBuilder result = new StringBuilder();
 
+            // Pobranie wybranych aktualnych danych pogodowych
             if (parameters.contains("temperature_2m") && currentWeather.has("temperature")) {
                 result.append("Temperatura: ").append(currentWeather.getDouble("temperature")).append(" °C\n");
             }
@@ -81,10 +90,11 @@ public class WeatherService {
                 result.append("Prędkość wiatru: ").append(currentWeather.getDouble("windspeed")).append(" km/h\n");
             }
 
+            // Dane godzinowe (np. ciśnienie, opady, temperatura gleby)
             if (json.has("hourly")) {
                 JSONObject hourly = json.getJSONObject("hourly");
                 JSONArray timeArray = hourly.getJSONArray("time");
-                int latestIndex = timeArray.length() - 1;
+                int latestIndex = timeArray.length() - 1; // pobieramy ostatnią godzinę
 
                 if (parameters.contains("surface_pressure") && hourly.has("surface_pressure")) {
                     JSONArray pressureArray = hourly.getJSONArray("surface_pressure");
@@ -98,8 +108,6 @@ public class WeatherService {
                     result.append("Opady: ").append(precipitation).append(" mm\n");
                 }
 
-
-
                 if (parameters.contains("soil_temperature_0cm") && hourly.has("soil_temperature_0cm")) {
                     JSONArray soilTempArray = hourly.getJSONArray("soil_temperature_0cm");
                     double soilTemp = soilTempArray.getDouble(latestIndex);
@@ -107,6 +115,7 @@ public class WeatherService {
                 }
             }
 
+            // Jeśli brak danych, zwracamy informację
             if (result.isEmpty()) {
                 result.append("Brak danych pogodowych dla wybranych parametrów.");
             }
@@ -119,37 +128,43 @@ public class WeatherService {
         }
     }
 
+    // METODA 2: Pobiera prognozę pogody w przedziale dat (z API)
     public String getWeatherForecast(double latitude, double longitude, List<String> parameters, String startDate, String endDate) {
         try {
+            // Budujemy URL zapytania z datami
             StringBuilder apiUrl = new StringBuilder("https://api.open-meteo.com/v1/forecast");
             apiUrl.append("?latitude=").append(latitude);
             apiUrl.append("&longitude=").append(longitude);
             apiUrl.append("&start_date=").append(startDate);
             apiUrl.append("&end_date=").append(endDate);
 
+            // Dołączamy wybrane parametry
             if (!parameters.isEmpty()) {
                 String joinedParams = String.join(",", parameters);
                 apiUrl.append("&hourly=").append(joinedParams);
             }
 
+            // Połączenie HTTP
             URL url = new URL(apiUrl.toString());
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
+            // Obsługa błędu HTTP
             int responseCode = conn.getResponseCode();
             if (responseCode != 200) {
                 throw new RuntimeException("HTTP GET Request Failed with Error code : " + responseCode);
             }
 
+            // Odczyt odpowiedzi JSON
             BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             StringBuilder response = new StringBuilder();
             String inputLine;
-
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
             }
             in.close();
 
+            // Parsowanie danych
             JSONObject json = new JSONObject(response.toString());
 
             if (!json.has("hourly")) {
@@ -161,15 +176,16 @@ public class WeatherService {
 
             StringBuilder result = new StringBuilder();
 
+            // Iteracja przez godziny prognozy
             for (int i = 0; i < timeArray.length(); i++) {
                 String time = timeArray.getString(i);
-
                 LocalDateTime dateTime = LocalDateTime.parse(time);
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM HH:mm", new Locale("pl"));
                 String formattedTime = dateTime.format(formatter);
 
                 result.append(formattedTime).append(":\n");
 
+                // Dla każdego parametru wypisujemy jego wartość
                 for (String param : parameters) {
                     if (hourly.has(param)) {
                         JSONArray paramArray = hourly.getJSONArray(param);
@@ -178,10 +194,8 @@ public class WeatherService {
                         String formattedValue;
                         if (val == JSONObject.NULL) {
                             formattedValue = "brak danych";
-                        } else if (val instanceof Number) {
-                            double number = ((Number) val).doubleValue();
-
-                            if (param.toLowerCase().contains("precipitation") && number == 0.0) {
+                        } else if (val instanceof Number number) {
+                            if (param.toLowerCase().contains("precipitation") && number.doubleValue() == 0.0) {
                                 formattedValue = "brak";
                             } else {
                                 formattedValue = number + getUnitForParameter(param);
@@ -204,8 +218,11 @@ public class WeatherService {
             return "Błąd podczas pobierania prognozy pogody. Jeśli pobierasz prognozę pogody, spróbuj zmniejszając liczbę dni";
         }
     }
+
+    // METODA 3: Pobiera dane historyczne pogodowe z ostatnich N dni
     public String getHistoricalWeather(double latitude, double longitude, List<String> parameters, int pastDays) {
         try {
+            // Budujemy URL z parametrem past_days
             StringBuilder apiUrl = new StringBuilder("https://api.open-meteo.com/v1/forecast");
             apiUrl.append("?latitude=").append(latitude);
             apiUrl.append("&longitude=").append(longitude);
@@ -215,6 +232,7 @@ public class WeatherService {
                 apiUrl.append("&hourly=").append(joinedParams);
             }
 
+            // Połączenie i pobranie danych
             URL url = new URL(apiUrl.toString());
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
@@ -227,12 +245,12 @@ public class WeatherService {
             BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             StringBuilder response = new StringBuilder();
             String inputLine;
-
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
             }
             in.close();
 
+            // Parsowanie odpowiedzi
             JSONObject json = new JSONObject(response.toString());
 
             if (!json.has("hourly")) {
@@ -248,17 +266,16 @@ public class WeatherService {
                 String time = timeArray.getString(i);
                 LocalDateTime dateTime = LocalDateTime.parse(time);
 
-                // odrzucamy dane, które są po wczoraj
+                // Pomijamy dane z dzisiaj i przyszłości
                 if (dateTime.toLocalDate().isAfter(LocalDate.now().minusDays(1))) {
-                    continue;  // pomijamy te dane (czyli przyszłe)
+                    continue;
                 }
 
-                // dalej Twój istniejący kod formatowania i wypisywania danych
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM HH:mm", new Locale("pl"));
                 String formattedTime = dateTime.format(formatter);
-
                 result.append(formattedTime).append(":\n");
 
+                // Wypisywanie wartości parametrów
                 for (String param : parameters) {
                     if (hourly.has(param)) {
                         JSONArray paramArray = hourly.getJSONArray(param);
@@ -267,10 +284,8 @@ public class WeatherService {
                         String formattedValue;
                         if (val == JSONObject.NULL) {
                             formattedValue = "brak danych";
-                        } else if (val instanceof Number) {
-                            double number = ((Number) val).doubleValue();
-
-                            if (param.toLowerCase().contains("precipitation") && number == 0.0) {
+                        } else if (val instanceof Number number) {
+                            if (param.toLowerCase().contains("precipitation") && number.doubleValue() == 0.0) {
                                 formattedValue = "brak";
                             } else {
                                 formattedValue = number + getUnitForParameter(param);
@@ -286,7 +301,6 @@ public class WeatherService {
                 result.append("\n");
             }
 
-
             return result.toString();
 
         } catch (Exception e) {
@@ -294,6 +308,4 @@ public class WeatherService {
             return "Błąd podczas pobierania danych historycznych.";
         }
     }
-
-
 }
